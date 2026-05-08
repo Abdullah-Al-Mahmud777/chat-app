@@ -12,16 +12,9 @@ export function ChatWindow({ conversation, onClose, echo }) {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
-  // Guard against undefined conversation
-  if (!conversation || !conversation.other_user) {
-    return (
-      <div className="bg-gray-900 rounded-xl shadow-2xl h-full flex items-center justify-center border border-gray-800">
-        <p className="text-gray-400">Select a conversation to start</p>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    if (!conversation || !conversation.other_user) return;
+    
     fetchMessages();
     
     if (echo && conversation?.id) {
@@ -51,6 +44,8 @@ export function ChatWindow({ conversation, onClose, echo }) {
   }, [messages]);
 
   const fetchMessages = async () => {
+    if (!conversation || !conversation.id) return;
+    
     try {
       setLoading(true);
       const response = await axios.get(
@@ -73,7 +68,7 @@ export function ChatWindow({ conversation, onClose, echo }) {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !conversation || !conversation.id) return;
 
     const messageContent = newMessage;
     setNewMessage('');
@@ -92,6 +87,15 @@ export function ChatWindow({ conversation, onClose, echo }) {
       setNewMessage(messageContent);
     }
   };
+
+  // Guard against undefined conversation
+  if (!conversation || !conversation.other_user) {
+    return (
+      <div className="bg-gray-900 rounded-xl shadow-2xl h-full flex items-center justify-center border border-gray-800">
+        <p className="text-gray-400">Select a conversation to start</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-gray-900 rounded-xl shadow-2xl border border-gray-800 overflow-hidden">
